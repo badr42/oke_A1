@@ -10,7 +10,8 @@ The script will provision a cluster with 2 nodes (both on the same AD) on 2 OCPU
 
 The script will then provision nginx (2 pods) and explose it behind a load balancer.
 
-Here is how the architecutre of the deployment looks like
+##Architecture
+
 ![results](https://github.com/badr42/oke_A1/blob/main/images/architecture.png)
 ## Requirements
 OCI tenancy
