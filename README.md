@@ -14,8 +14,8 @@ The script will then provision nginx (2 pods) and explose it behind a load balan
 
 ![results](https://github.com/badr42/oke_A1/blob/main/images/architecture.png)
 ## Requirements
-OCI tenancy
-An OCI compartment
+1. OCI tenancy
+2. An OCI compartment
 
 ## Configuration
 
