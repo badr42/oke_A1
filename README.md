@@ -62,7 +62,7 @@ kubectl  --kubeconfig kubeconfig get service
 
 
 the result should look like and you can see the external IP of the LB
-![results] (https://github.com/badr42/oke_A1/images/result.png)
+![results] (https://github.com/badr42/oke_A1/blob/main/images/results.png)
 
 
 ## Terminating the environment
