@@ -1,6 +1,5 @@
 variable "compartment_ocid" {
   description = ""
-
 }
 
 variable "region" {
