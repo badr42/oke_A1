@@ -1,19 +1,6 @@
 provider "oci" {}
 
 
-# data "oci_core_images" "images" {
-#   compartment_id = var.compartment_ocid
-#   operating_system = "Oracle-Linux"
-#   shape = var.instance_shape
-# }
-
-
-# data "oci_identity_region_subscriptions" "test_region_subscriptions" {
-#     #Required
-#     tenancy_id = oci_identity_tenancy.test_tenancy.id
-    
-# }
-
 
 data "oci_identity_availability_domains" "ADs" {
   compartment_id = var.compartment_ocid
@@ -321,29 +308,33 @@ resource "oci_containerengine_node_pool" "create_node_pool_details0" {
 		}
 		placement_configs {
 			# availability_domain = "VrTN:EU-FRANKFURT-1-AD-2"
-			availability_domain = data.oci_identity_availability_domains.ADs.availability_domains[2].name
+			availability_domain = data.oci_identity_availability_domains.ADs.availability_domains[var.AD_number].name
 			subnet_id = "${oci_core_subnet.node_subnet.id}"
 		}
-		size = "2"
+		size = var.node_count
 	}
 	node_eviction_node_pool_settings {
 		eviction_grace_duration = "PT60M"
 	}
 	node_shape = "VM.Standard.A1.Flex"
 	node_shape_config {
-		memory_in_gbs = "32"
-		ocpus = "2"
+		memory_in_gbs = var.ocpu_count*2 <16 ? 16 : var.ocpu_count*2
+		ocpus = var.ocpu_count
 	}
 	node_source_details {
-		image_id = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaa3nbemlvqu3bxtkkgzqhflktc5ysjkq2o5nk7urs5tsywfeyzyacq"
+	///get image from lookup 
+		image_id = var.InstanceImageOCID[var.region]
 		source_type = "IMAGE"
 	}
+
+
+	provisioner "local-exec" {
+		command = "bash setup_nginx.sh"
+	}
+
 }
 
 
-
-
-# https://www.terraform.io/docs/providers/oci/d/containerengine_cluster_kube_config.html
 data "oci_containerengine_cluster_kube_config" "cluster_kube_config" {	 
   cluster_id    = "${oci_containerengine_cluster.generated_oci_containerengine_cluster.id}"
   expiration    = 2592000
@@ -356,153 +347,3 @@ resource "local_file" "kubeconfig" {
   filename = "${path.module}/kubeconfig"
 }
 
-
-#kubectl --kubeconfig kubeconfig get nodes
-
-#kubectl create -f https://k8s.io/examples/application/deployment.yaml
-#kubectl expose deployment nginx-deployment --port=80 --target-port=80 --name=nginx-lb --type=LoadBalancer
-#kubectl get service
-
-
-
-# data "oci_containerengine_cluster_option" "test_cluster_option" {
-#   cluster_option_id = "all"
-# }
-
-# data "oci_containerengine_node_pool_option" "test_node_pool_option" {
-#   node_pool_option_id = "all"
-# }
-
-# data "oci_core_images" "shape_specific_images" {
-#   #Required
-#   compartment_id = var.tenancy_ocid
-#   shape = "VM.Standard.A1.Flex"
-# }
-
-
-
-
-# resource "oci_containerengine_node_pool" "create_node_pool_details0" {
-# 	cluster_id = "${oci_containerengine_cluster.generated_oci_containerengine_cluster.id}"
-# 	compartment_id = var.compartment_ocid
-# 	freeform_tags = {
-# 		"OKEnodePoolName" = "pool1"
-# 	}
-# 	initial_node_labels {
-# 		key = "name"
-# 		value = "cluster2"
-# 	}
-# 	kubernetes_version = "v1.24.1"
-# 	name = "pool1"
-# 	node_config_details {
-# 		freeform_tags = {
-# 			"OKEnodePoolName" = "pool1"
-# 		}
-# 		placement_configs {
-# 			availability_domain = data.oci_identity_availability_domains.ADs.availability_domains[0].name
-# 			subnet_id = "${oci_core_subnet.node_subnet.id}"
-# 		}
-# 		size = "2"
-# 	}
-# 	node_eviction_node_pool_settings {
-# 		eviction_grace_duration = "PT60M"
-# 	}
-# 	node_shape = "VM.Standard.A1.Flex"
-# 	node_shape_config {
-# 		memory_in_gbs = "32"
-# 		ocpus = "2"
-# 	}
-# 	node_source_details {
-# 		image_id = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaa3nbemlvqu3bxtkkgzqhflktc5ysjkq2o5nk7urs5tsywfeyzyacq"
-# 		source_type = "IMAGE"
-# 	}
-# }
-
-
-
-
-# resource "oci_containerengine_node_pool" "create_node_pool_details0" {
-# 	cluster_id = "${oci_containerengine_cluster.generated_oci_containerengine_cluster.id}"
-# 	compartment_id = var.compartment_ocid
-# 	freeform_tags = {
-# 		"OKEnodePoolName" = "pool1"
-# 	}
-# 	initial_node_labels {
-# 		key = "name"
-# 		value = "A1Cluster"
-# 	}
-# 	kubernetes_version = "v1.24.1"
-# 	name = "pool1"
-# 	node_config_details {
-# 		freeform_tags = {
-# 			"OKEnodePoolName" = "pool1"
-# 		}
-# 		placement_configs {
-# 			availability_domain = data.oci_identity_availability_domains.ADs.availability_domains[0].name
-# 			subnet_id = "${oci_core_subnet.node_subnet.id}"
-# 		}
-# 		size = "2"
-# 	}
-# 	node_eviction_node_pool_settings {
-# 		eviction_grace_duration = "PT60M"
-# 	}
-# 	node_shape = "VM.Standard.A1.Flex"
-# 	node_shape_config {
-# 		memory_in_gbs = "32"
-# 		ocpus = "2"
-# 	}
-# 	node_source_details {
-# 		# image_id = data.oci_core_images.images.images[0].id
-# 		image_id = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaa3nbemlvqu3bxtkkgzqhflktc5ysjkq2o5nk7urs5tsywfeyzyacq"
-# 		source_type = "IMAGE"
-# 	}
-
-# 	# 	# optimized OKE images
-# 	# dynamic "node_source_details" {
-# 	# 	for_each = var.node_pool_image_type == "oke" ? [1] : []
-# 	# 	content {
-# 	# 	boot_volume_size_in_gbs = lookup(each.value, "boot_volume_size", 50)
-# 	# 	# check for GPU,A1 and other shapes. In future, if some other shapes or images are added, we need to modify
-# 	# 	image_id = (var.node_pool_image_type == "oke" && length(regexall("GPU|A1", lookup(each.value, "shape"))) == 0) ? (element([for source in local.node_pool_image_ids : source.image_id if length(regexall("Oracle-Linux-${var.node_pool_os_version}-20[0-9]*.*-OKE-${local.k8s_version_only}", source.source_name)) > 0], 0)) : (var.node_pool_image_type == "oke" && length(regexall("GPU", lookup(each.value, "shape"))) > 0) ? (element([for source in local.node_pool_image_ids : source.image_id if length(regexall("Oracle-Linux-${var.node_pool_os_version}-Gen[0-9]-GPU-20[0-9]*.*-OKE-${local.k8s_version_only}", source.source_name)) > 0], 0)) : (var.node_pool_image_type == "oke" && length(regexall("A1", lookup(each.value, "shape"))) > 0) ? (element([for source in local.node_pool_image_ids : source.image_id if length(regexall("Oracle-Linux-${var.node_pool_os_version}-aarch64-20[0-9]*.*-OKE-${local.k8s_version_only}", source.source_name)) > 0], 0)) : null
-
-# 	# 	source_type = data.oci_containerengine_node_pool_option.node_pool_options.sources[0].source_type
-# 	# 	}
-# 	# }
-
-
-
-# }
-
-# # Obtain cluster Kubeconfig.
-# data "oci_containerengine_cluster_kube_config" "kube_config" {
-#   cluster_id = oci_containerengine_cluster.generated_oci_containerengine_cluster.cluster_id
- 
-# }
-
-
-
-
-# # Obtain cluster Kubeconfig.
-# data "oci_containerengine_cluster_kube_config" "kube_config" {
-#   cluster_id = module.oke_my_cluster.cluster_id
-# }
-
-# # Store kubeconfig in vault.
-# resource "vault_generic_secret" "kube_config" {
-#   path = "my/cluster/path/kubeconfig"
-#   data_json = jsonencode({
-#     "data" : data.oci_containerengine_cluster_kube_config.kube_config.content
-#   })
-# }
-
-# # Store kubeconfig in file.
-# resource "local_file" "kube_config" {
-#   content         = data.oci_containerengine_cluster_kube_config.kube_config.content
-#   filename        = "/tmp/kubeconfig"
-#   file_permission = "0600"
-# }
-
-
-
-
-#https://github.com/oracle/terraform-provider-oci/blob/master/examples/container_engine/main.tf

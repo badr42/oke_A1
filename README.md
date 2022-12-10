@@ -31,7 +31,7 @@ export TF_VAR_AD_number='0'
 ### Select number of nodes
 export TF_VAR_node_count='2'
 
-### Select number of nodes
+### Set OCPU count per node
 export TF_VAR_ocpu_count='2'
 
 ```
@@ -47,58 +47,22 @@ terraform apply
 ```
 
 
-**After applying, the service will be ready in about 25 minutes** (it will install OS dependencies, as well as the packages needed to get openMPI to work)
+**After applying, the service will be ready in about 25 minutes**  
+
+
 
 ## Post configuration
 
-To test the app ssh to the machine and run one of the test algorithms pre-loaded to the environment 
+You should be able to get your nginx LB IP by running the following command 
 
 ```
-ssh -i server.key ubuntu@<instance-public-ip>
-cd ~/Desktop/sharedfolder
-mpirun -np 2 ./mpi-prime
-```
-
-
-the result should look like :
+kubectl  --kubeconfig kubeconfig get service
 
 ```
-ubuntu@openmpi:~/Desktop/sharedfolder$ mpirun -np 20 ./mpi-prime
-20 November 2022 11:55:34 AM
 
-PRIME_MPI
-  C/MPI version
 
-  An MPI example program to count the number of primes.
-  The number of processes is 20
-
-         N        Pi          Time
-
-         1         0        0.009797
-         2         1        0.000177
-         4         2        0.000106
-         8         4        0.000057
-        16         6        0.000117
-        32        11        0.000054
-        64        18        0.000055
-       128        31        0.000053
-       256        54        0.000055
-       512        97        0.000054
-      1024       172        0.000056
-      2048       309        0.000103
-      4096       564        0.000338
-      8192      1028        0.001200
-     16384      1900        0.004490
-     32768      3512        0.016233
-     65536      6542        0.060947
-    131072     12251        0.227687
-    262144     23000        0.848808
-    524288     43390        3.205449
-   1048576     82025       12.120073
-
-PRIME_MPI - Master process:
-  Normal end of execution.
-```
+the result should look like and you can see the external IP of the LB
+![results] (https://github.com/badr42/oke_A1/images/result.png)
 
 
 ## Terminating the environment
@@ -109,8 +73,3 @@ terraform destroy
 
 ```
 
-
-## Building a cluster
-
-To build a cluster you can repeat this several times to build several nodes and then connect them together as shown here
-https://feyziyev007.medium.com/how-to-install-openmpi-on-ubuntu-18-04-cluster-2fb3f03bdf61
